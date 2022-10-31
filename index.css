@@ -1,0 +1,48 @@
+.row0 {
+    display: flex;
+    flex-direction: row;
+}
+
+.mainDiv{
+    display: flex;
+    flex-direction: column;
+}
+
+.sudokuGrid {
+    display: grid;
+    grid-template-columns: 150px 150px 150px;
+    grid-template-rows: 150px 150px 150px;
+    font-size: x-large;
+}
+
+.box3x3{
+    display: grid;
+    grid-template-columns: 50px 50px 50px;
+    grid-template-rows: 50px 50px 50px;
+    border: 2px solid black;
+}
+
+.sudokuBox {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: 1px solid black;
+    font-size: 1em;
+}
+
+/* .blurSelector{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+} */
+
+/* .solveButton{
+    display: flex;
+    justify-self: center;
+} */
+
+.imagePlaceholder{
+    display: flex;
+    flex-direction: column;
+    width: fit-content;
+}
