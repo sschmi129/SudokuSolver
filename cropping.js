@@ -35,7 +35,7 @@ let sudokuSolverFunction = (image, blurValue, thresholdAlgoValue, thresholdType)
     let threshold = new cv.Mat();
     let threshold2 = new cv.Mat();
 
-    
+
 
     console.log("blurvalue: " + blurValue);
 
@@ -124,9 +124,6 @@ let sudokuSolverFunction = (image, blurValue, thresholdAlgoValue, thresholdType)
     cv.warpPerspective(greyImage, dst, M, new cv.Size(maxWidth, maxHeight), cv.INTER_NEAREST, cv.BORDER_REPLICATE, new cv.Scalar())
 
     cv.GaussianBlur(dst, dst, new cv.Size(3, 3), 0, 0, blurSelector[blurValue]);
-
-
-
     cv.adaptiveThreshold(dst, dst, 255, thresholdAlgoSelector[thresholdAlgoValue], thresholdTypes[0], 11, 16);
 
     // show cropped image in canvaselement 'canvasOutput' 
@@ -152,16 +149,16 @@ let sudokuSolverFunction = (image, blurValue, thresholdAlgoValue, thresholdType)
     // cv.rectangle(dst, new cv.Point(30, 30), new cv.Point(60, 60), [0, 0, 255, 255], 1);
 
     for (let i = 0; i < tileArray.length; i++) {
-        cv.rectangle(showPictureOnWebsite, new cv.Point(tileArray[i].left, tileArray[i].top), new cv.Point(tileArray[i].left+tileArray[i].width, tileArray[i].top+tileArray[i].height), [0, 255, 255, 255], 1);
+        cv.rectangle(showPictureOnWebsite, new cv.Point(tileArray[i].left, tileArray[i].top), new cv.Point(tileArray[i].left + tileArray[i].width, tileArray[i].top + tileArray[i].height), [0, 255, 255, 255], 1);
     }
 
     cv.imshow('canvasOutput', dst);
 
-    cv.imshow('canvasOutput2', showPictureOnWebsite) 
+    cv.imshow('canvasOutput2', showPictureOnWebsite)
 
     // cv.imshow('Output', dst)
 
-    
+
 
 
 
@@ -181,34 +178,72 @@ let sudokuSolverFunction = (image, blurValue, thresholdAlgoValue, thresholdType)
         //     const { data: { text } } = await worker.recognize(croppedImage, { rectangle: rectangles[i] });
         //     values.push(text);
         // }
+        console.log(tileArray.length);
         for (let i = 0; i < tileArray.length; i++) {
             const { data: { text } } = await worker.recognize(OCRImage, { rectangle: tileArray[i] });
-            values.push(text);
+            values.push({
+                tileNumber: i,
+                text: text
+            });
         }
 
-        let possibleValues = [0,1,2,3,4,5,6,7,8,9];
-        for (let i = 0; i < values.length; i++) {
-            if (values[i] === null) {
-                values[i] = 0;
+
+        let promiseList = [];
+        for (let i = 0; i < tileArray.length; i++) {
+            const tempPormise = new Promise(() => {
+                const { data: { text } } = worker.recognize(OCRImage, { rectangle: tileArray[i] });
+                values.push({
+                    tileNumber: i,
+                    text: text
+                });
             }
-            values[i] = +values[i].replace(/[^.\d]/g, '');
-            if (!possibleValues.includes(values[i])){
-                values[i] = 0;
+            )
+            promiseList.push(tempPormise);
+        }
+
+        Promise.all(promiseList);
+
+        console.log("After Promise");
+
+        values.sort(compareFn);
+
+        function compareFn(a, b) {
+            if (a.tileNumber < b.tileNumber) {
+                return -1;
+            }
+            if (a.tileNumber > b.tileNumber) {
+                return 1;
+            }
+            // a must be equal to b
+            return 0;
+        }
+
+        console.log("aaasssdddd");
+        console.log(values);
+
+        let possibleValues = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+        for (let i = 0; i < values.length; i++) {
+            if (values[i].text === null) {
+                values[i].text = 0;
+            }
+            values[i].text = +values[i].text.replace(/[^.\d]/g, '');
+            if (!possibleValues.includes(values[i].text)) {
+                values[i].text = 0;
             }
         }
         console.log(values);
 
         for (let i = 0; i < values.length; i++) {
-            if (values[i] !== 0) {
-                let x = document.getElementById(`box${i}`);
-                x.innerHTML = values[i];
+            if (values[i].text !== 0) {
+                let x = document.getElementById(`box${values[i].tileNumber}`);
+                x.innerHTML = values[i].text;
             }
 
         }
 
         let arrayToStringSudoku = '';
         for (let i = 0; i < values.length; i++) {
-            arrayToStringSudoku += values[i];
+            arrayToStringSudoku += values[i].text;
         }
         console.log(arrayToStringSudoku);
         let options = {
