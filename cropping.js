@@ -1,8 +1,22 @@
 let inputImageElement = document.getElementById('inputImage');
 let imagePlaceholder = document.getElementById('imagePlaceholder');
 
+let values = [];
+let valuesMatrix =
+    [
+        [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0]
+    ]
 
 let sudokuSolverFunction = (image, blurValue, thresholdAlgoValue, thresholdType) => {
+
 
     const blurSelector = {
         0: cv.BORDER_CONSTANT,
@@ -137,7 +151,7 @@ let sudokuSolverFunction = (image, blurValue, thresholdAlgoValue, thresholdType)
         tmp2[i] = arrayDst[i]
     }
 
-    let tileArray = sudokuGridOCR(dst);
+    let tileArray = sudokuGridBorderForOCR(dst);
 
     showPictureOnWebsite = dst.clone();
 
@@ -159,53 +173,61 @@ let sudokuSolverFunction = (image, blurValue, thresholdAlgoValue, thresholdType)
     // cv.imshow('Output', dst)
 
 
+    console.log("after images showing");
 
-
-
-    console.log(tileArray);
-
+    // let values = [];
     let OCRImage = document.getElementById("canvasOutput2").toDataURL();
     // let OCRImage = document.getElementById("OCRImage").toDataURL();
-    const worker = Tesseract.createWorker({
-        tessedit_char_whitelist: '0123456789',
-    });
+
+    console.log("before OCRinit");
+    const scheduler = Tesseract.createScheduler();
+
+
+    console.log("after OCRinit");
+    let promiseArray = [];
     (async () => {
-        await worker.load();
-        await worker.loadLanguage('eng');
-        await worker.initialize('eng');
-        const values = [];
-        // for (let i = 0; i < rectangles.length; i++) {
-        //     const { data: { text } } = await worker.recognize(croppedImage, { rectangle: rectangles[i] });
-        //     values.push(text);
-        // }
-        console.log(tileArray.length);
+        const OCRWorker1 = await Tesseract.createWorker();
+        const OCRWorker2 = await Tesseract.createWorker();
+        const OCRWorker3 = await Tesseract.createWorker();
+        await scheduler.addWorker(OCRWorker1, OCRWorker2, OCRWorker3);
+        // await OCRWorker1.load();
+        await OCRWorker1.loadLanguage('eng');
+        await OCRWorker1.initialize('eng');
+        // await OCRWorker2.load();
+        await OCRWorker2.loadLanguage('eng');
+        await OCRWorker2.initialize('eng');
+        // await OCRWorker3.load();
+        await OCRWorker3.loadLanguage('eng');
+        await OCRWorker3.initialize('eng');
+        console.log("enter async");
         for (let i = 0; i < tileArray.length; i++) {
-            const { data: { text } } = await worker.recognize(OCRImage, { rectangle: tileArray[i] });
+            // const { data: { text } } = await OCRWorker1.recognize(OCRImage, { rectangle: tileArray[i] });
+            // console.log("Tile " + (i + 1) + ":  " + text);
+            // const { data: { text } } = scheduler.addJob('recognize', OCRImage, { rectangle: tileArray[i] });
+            promiseArray.push(scheduler.addJob('recognize', OCRImage, { rectangle: tileArray[i] }))
+
+            console.log(Promise);
+            // console.log("whats up");
+            // const values = await Promise.all(rectangles.map((rectangle) => (
+            //     scheduler.addJob('recognize', 'https://tesseract.projectnaptha.com/img/eng_bw.png', { rectangle })
+            //   )));
+            // values.push({
+            //     tileNumber: i,
+            //     text: text
+            // });
+        }
+
+        let resultsOfOCR = await Promise.all(promiseArray);
+        console.log(resultsOfOCR);
+        // for
+        for (let i = 0; i < resultsOfOCR.length; i++) {
+            let x = resultsOfOCR[i];
             values.push({
                 tileNumber: i,
-                text: text
-            });
-        }
-
-
-        let promiseList = [];
-        for (let i = 0; i < tileArray.length; i++) {
-            const tempPormise = new Promise(() => {
-                const { data: { text } } = worker.recognize(OCRImage, { rectangle: tileArray[i] });
-                values.push({
-                    tileNumber: i,
-                    text: text
-                });
+                text: x.data.text,
             }
             )
-            promiseList.push(tempPormise);
         }
-
-        Promise.all(promiseList);
-
-        console.log("After Promise");
-
-        values.sort(compareFn);
 
         function compareFn(a, b) {
             if (a.tileNumber < b.tileNumber) {
@@ -217,6 +239,8 @@ let sudokuSolverFunction = (image, blurValue, thresholdAlgoValue, thresholdType)
             // a must be equal to b
             return 0;
         }
+
+        values.sort(compareFn);
 
         console.log("aaasssdddd");
         console.log(values);
@@ -231,41 +255,174 @@ let sudokuSolverFunction = (image, blurValue, thresholdAlgoValue, thresholdType)
                 values[i].text = 0;
             }
         }
-        console.log(values);
+
 
         for (let i = 0; i < values.length; i++) {
             if (values[i].text !== 0) {
                 let x = document.getElementById(`box${values[i].tileNumber}`);
                 x.innerHTML = values[i].text;
             }
-
         }
 
-        let arrayToStringSudoku = '';
         for (let i = 0; i < values.length; i++) {
-            arrayToStringSudoku += values[i].text;
+            let row = parseInt(i / 9);
+            let column = i % 9;
+            valuesMatrix[row][column] = values[i].text;
         }
-        console.log(arrayToStringSudoku);
-        let options = {
-            emptyValue: '0',
-            hintCheck: true,
-            outputArray: true,
-            // maxIterations: 1<<20,
-            maxIterations: 20,
-        };
-        let solvedSudoku = solve(arrayToStringSudoku, options);
-        console.log(solvedSudoku);
-
-        for (let i = 0; i < solvedSudoku.length; i++) {
-            let x = document.getElementById(`box${i}`);
-            x.innerHTML = solvedSudoku[i];
-        }
-        // parseNum = str => +str.replace(/[^.\d]/g, '');
-
-        await worker.terminate();
-    })();
 
 
+        let solveButton = document.createElement('button');
+        solveButton.innerHTML = "Solve";
+        solveButton.id = "SudokuSolveButton"
+        solveButton.addEventListener('click', (e) => {
+            
+            valuesMatrix = solveSudoku(valuesMatrix);
+
+            for (let i = 0; i < valuesMatrix.length; i++) {
+                for (let j = 0; j < valuesMatrix[i].length; j++) {
+                    
+                    let ij = i*9 + j;
+                    let x = document.getElementById(`box${ij}`);
+                    x.innerHTML = valuesMatrix[i][j];
+                }
+            }
+        });
+        const sudokuGrid = document.getElementById("sudokuGrid");
+        sudokuGrid.appendChild(solveButton);
+
+        //from here solving
+
+        // let arrayToStringSudoku = '';
+        // for (let i = 0; i < values.length; i++) {
+        //     arrayToStringSudoku += values[i].text;
+        // }
+        // console.log(arrayToStringSudoku);
+        // let options = {
+        //     emptyValue: '0',
+        //     hintCheck: true,
+        //     outputArray: true,
+        //     // maxIterations: 1<<20,
+        //     maxIterations: 20,
+        // };
+        // let solvedSudoku = solve(arrayToStringSudoku, options);
+        // console.log(solvedSudoku);
+
+        // for (let i = 0; i < solvedSudoku.length; i++) {
+        //     let x = document.getElementById(`box${i}`);
+        //     x.innerHTML = solvedSudoku[i];
+        // }
+
+        await scheduler.terminate();
+    }
+    )();
+
+
+    // const worker = Tesseract.createWorker({
+    //     tessedit_char_whitelist: '0123456789',
+    // });
+    // (async () => {
+    //     await worker.load();
+    //     await worker.loadLanguage('eng');
+    //     await worker.initialize('eng');
+
+    //     // for (let i = 0; i < rectangles.length; i++) {
+    //     //     const { data: { text } } = await worker.recognize(croppedImage, { rectangle: rectangles[i] });
+    //     //     values.push(text);
+    //     // }
+
+    //     for (let i = 0; i < tileArray.length; i++) {
+    //         const { data: { text } } = await worker.recognize(OCRImage, { rectangle: tileArray[i] });
+    //         // console.log("Tile " + (i + 1) + ":  " + text);
+    //         values.push({
+    //             tileNumber: i,
+    //             text: text
+    //         });
+    //     }
+
+    //     // let testValues = [];
+    //     // promiseX = Promise(OCRWorker(tileArray, testValues, 1))
+    //     // console.log("testValues");
+    //     // console.log(testValues);
+
+    //     function compareFn(a, b) {
+    //         if (a.tileNumber < b.tileNumber) {
+    //             return -1;
+    //         }
+    //         if (a.tileNumber > b.tileNumber) {
+    //             return 1;
+    //         }
+    //         // a must be equal to b
+    //         return 0;
+    //     }
+
+
+    //     // let promiseList = [];
+    //     // for (let i = 0; i < tileArray.length; i++) {
+    //     //     const tempPromise = new Promise(() => {
+    //     //         const { data: { text } } = worker.recognize(OCRImage, { rectangle: tileArray[i] });
+    //     //         values.push({
+    //     //             tileNumber: i,
+    //     //             text: text
+    //     //         });
+    //     //     }
+    //     //     )
+    //     //     promiseList.push(tempPromise);
+    //     // }
+
+    //     // await Promise.all(promiseList);
+
+    //     // console.log("After Promise");
+
+    //     values.sort(compareFn);
+
+    //     console.log("aaasssdddd");
+    //     console.log(values);
+
+    //     let possibleValues = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+    //     for (let i = 0; i < values.length; i++) {
+    //         if (values[i].text === null) {
+    //             values[i].text = 0;
+    //         }
+    //         values[i].text = +values[i].text.replace(/[^.\d]/g, '');
+    //         if (!possibleValues.includes(values[i].text)) {
+    //             values[i].text = 0;
+    //         }
+    //     }
+    //     console.log(values);
+
+    //     for (let i = 0; i < values.length; i++) {
+    //         if (values[i].text !== 0) {
+    //             let x = document.getElementById(`box${values[i].tileNumber}`);
+    //             x.innerHTML = values[i].text;
+    //         }
+
+    //     }
+
+    //     let arrayToStringSudoku = '';
+    //     for (let i = 0; i < values.length; i++) {
+    //         arrayToStringSudoku += values[i].text;
+    //     }
+    //     console.log(arrayToStringSudoku);
+    //     let options = {
+    //         emptyValue: '0',
+    //         hintCheck: true,
+    //         outputArray: true,
+    //         // maxIterations: 1<<20,
+    //         maxIterations: 20,
+    //     };
+    //     let solvedSudoku = solve(arrayToStringSudoku, options);
+    //     console.log(solvedSudoku);
+
+    //     for (let i = 0; i < solvedSudoku.length; i++) {
+    //         let x = document.getElementById(`box${i}`);
+    //         x.innerHTML = solvedSudoku[i];
+    //     }
+    //     // parseNum = str => +str.replace(/[^.\d]/g, '');
+
+    //     await worker.terminate();
+    // })();
+
+    console.log("after async");
 
     originalImage.delete();
     reducedSize.delete();
@@ -365,7 +522,7 @@ inputImageElement.addEventListener('input', (e) => {
     // imagePlaceholder.appendChild(lableCreater('thresholdAlgoSelector', 'Threshold Algorithms'));
 
 
-    solveButton.innerHTML = 'SOLVE!';
+    solveButton.innerHTML = 'Recognize';
     solveButton.id = 'solveButton';
     solveButton.addEventListener('click', (e) => {
         let blurValue = document.getElementById('blurSelector');
@@ -377,6 +534,9 @@ inputImageElement.addEventListener('input', (e) => {
         sudokuSolverFunction(image, blurValue.value, thresholdAlgoValue, thresholdType.value);
     }, false);
 
+    let paragraph = document.createElement('p');
+    paragraph.innerHTML = "Recognize the outer rectangle of sudoku. Cut out from the rest of the image."
+
     // imagePlaceholder.appendChild(lableCreater('blurSelector', 'Blur'));
     imagePlaceholder.appendChild(blurSelector);
     imagePlaceholder.appendChild(thresholdTypeSelector);
@@ -384,6 +544,29 @@ inputImageElement.addEventListener('input', (e) => {
 
 
 }, false);
+
+
+// const solveSudoku = () => {
+//     let arrayToStringSudoku = '';
+//     for (let i = 0; i < values.length; i++) {
+//         arrayToStringSudoku += values[i].text;
+//     }
+//     console.log(arrayToStringSudoku);
+//     let options = {
+//         emptyValue: '0',
+//         hintCheck: true,
+//         outputArray: true,
+//         // maxIterations: 1<<20,
+//         maxIterations: 30,
+//     };
+//     let solvedSudoku = solve(arrayToStringSudoku, options);
+//     console.log(solvedSudoku);
+
+//     for (let i = 0; i < solvedSudoku.length; i++) {
+//         let x = document.getElementById(`box${i}`);
+//         x.innerHTML = solvedSudoku[i];
+//     }
+// }
 
 reframe = (biggest) => {
     let points = Array.from(biggest.data32S)
@@ -476,3 +659,48 @@ main_outline = (contours) => {
 function onOpenCvReady() {
     document.getElementById('status').innerHTML = 'OpenCV.js is ready.';
 }
+
+// onClickListener for Sudoku Grid. Correction for false recognition of number
+const numberCorrection = (e) => {
+    console.log("e: ");
+    console.log(e);
+    console.log(e.target.innerHTML);
+
+    let tileNumber = parseInt((e.target.id).replace(/\D/g, ''))
+
+    if (e.target.innerHTML === "") {
+        values[tileNumber].tileNumber = tileNumber;
+        values[tileNumber].text = 1;
+
+        let row = parseInt(tileNumber / 9);
+        let column = tileNumber % 9;
+        valuesMatrix[row][column] = 1;
+
+        e.target.innerHTML = 1;
+        return;
+    }
+    if (parseInt(e.target.innerHTML) + 1 < 10) {
+        // values[e.target.id] = parseInt(e.target.innerHTML) + 1;
+
+        values[tileNumber].tileNumber = tileNumber;
+        values[tileNumber].text = parseInt(e.target.innerHTML) + 1;
+
+        let row = parseInt(tileNumber / 9);
+        let column = tileNumber % 9;
+        valuesMatrix[row][column] = parseInt(e.target.innerHTML) + 1;
+
+        e.target.innerHTML = parseInt(e.target.innerHTML) + 1;
+        return;
+    }
+    if (parseInt(e.target.innerHTML) + 1 >= 10) {
+        values[tileNumber].tileNumber = tileNumber;
+        values[tileNumber].text = 0;
+
+        let row = parseInt(tileNumber / 9);
+        let column = tileNumber % 9;
+        valuesMatrix[row][column] = 0;
+
+        e.target.innerHTML = "";
+        return;
+    }
+} 
