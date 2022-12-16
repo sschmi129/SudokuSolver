@@ -98,11 +98,6 @@ let sudokuSolverFunction = (image, blurValue, thresholdAlgoValue, thresholdType)
         tmpTest[j + 1] = parseInt(points_new[i][k + 1] * originalImage.size().height / reducedSize.size().height);
     }
 
-    console.log("originalImage: ");
-    console.log(originalImage.size().height); //works
-    console.log("tmpTest");
-    console.log(tmpTest);
-
     widthA = Math.sqrt((Math.pow((tmpTest[0] - tmpTest[2]), 2)) + ((Math.pow(tmpTest[1] - tmpTest[3]), 2)))
     widthB = Math.sqrt((Math.pow((tmpTest[4] - tmpTest[6]), 2)) + ((Math.pow(tmpTest[5] - tmpTest[7]), 2)))
     maxWidth = Math.max(widthA, widthB)
@@ -111,19 +106,6 @@ let sudokuSolverFunction = (image, blurValue, thresholdAlgoValue, thresholdType)
     heightA = Math.sqrt((Math.pow((tmpTest[0] - tmpTest[4]), 2)) + ((Math.pow(tmpTest[1] - tmpTest[5]), 2)))
     heightB = Math.sqrt((Math.pow((tmpTest[2] - tmpTest[6]), 2)) + ((Math.pow(tmpTest[3] - tmpTest[7]), 2)))
     maxHeight = Math.max(heightA, heightB)
-
-
-
-    console.log(widthA);
-    console.log(widthB);
-    console.log(heightA);
-    console.log(heightB);
-
-    // heightA = np.sqrt(((tr[0] - br[0]) ** 2) + ((tr[1] - br[1]) ** 2))
-    // heightB = np.sqrt(((tl[0] - bl[0]) ** 2) + ((tl[1] - bl[1]) ** 2))
-    // maxHeight = max(int(heightA), int(heightB))
-
-
 
 
 
@@ -275,7 +257,7 @@ let sudokuSolverFunction = (image, blurValue, thresholdAlgoValue, thresholdType)
         solveButton.innerHTML = "Solve";
         solveButton.id = "SudokuSolveButton"
         solveButton.addEventListener('click', (e) => {
-            
+
             valuesMatrix = solveSudoku(valuesMatrix);
 
             for (let i = 0; i < valuesMatrix.length; i++) {
