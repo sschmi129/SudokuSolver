@@ -1,33 +1,45 @@
-html{
-    width: 960px;
-}
-
-body{
-    width: 960px;
-}
-
-.row0 {
+html {
+    width: 100%;
+    font-size: 2em;
+    height: 100%;
+    margin: 0;
     display: flex;
-    flex-direction: row;
+    justify-content: center;
 }
 
-.mainDiv{
+
+body {
+    width: 960px;
+
+}
+
+.mainDiv {
     display: flex;
     flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    /* text-align: center; */
+    margin: 0 auto;
+}
+
+canvas {
+    width: fit-content;
 }
 
 .sudokuGrid {
+    width: fit-content;
     display: grid;
-    grid-template-columns: 150px 150px 150px;
-    grid-template-rows: 150px 150px 150px;
-    font-size: x-large;
+    grid-template-columns: 240px 240px 240px;
+    grid-template-rows: 240px 240px 240px;
+    border: 2px solid black;
+    /* font-size: x-large; */
     user-select: none;
 }
 
-.box3x3{
+.box3x3 {
     display: grid;
-    grid-template-columns: 50px 50px 50px;
-    grid-template-rows: 50px 50px 50px;
+    grid-template-columns: 80px 80px 80px;
+    grid-template-rows: 80px 80px 80px;
     border: 2px solid black;
 }
 
@@ -36,7 +48,14 @@ body{
     justify-content: center;
     align-items: center;
     border: 1px solid black;
-    font-size: 1em;
+    /* fo6nt-size: 1em; */
+}
+
+img {
+    /* display: block;
+    margin-left: auto;
+    margin-right: auto; */
+    width: 100%;
 }
 
 /* .blurSelector{
@@ -50,8 +69,42 @@ body{
     justify-self: center;
 } */
 
-.imagePlaceholder{
+.imagePlaceholder {
     display: flex;
     flex-direction: column;
     width: fit-content;
+    margin-bottom: 1em;
+}
+
+.canvasPlaceholder{
+    margin-bottom: 2em;
+}
+
+.inputImage {
+    /* display: flex; */
+    font-size: 1em;
+    margin-bottom: 0.5em;
+}
+
+button {
+    width: fit-content;
+    font-size: 2em;
+    color: white;
+    border: none;
+    background-color: #008CBA;
+}
+
+.sudokuGridSection{
+    margin-bottom: 2em;
+}
+
+.sudokuGridSectionBottom {
+    display: flex;
+    flex-direction: row;
+}
+
+.noSolution {
+    color: red;
+    text-align: center;
+    width: 100%;
 }

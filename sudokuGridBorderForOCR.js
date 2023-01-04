@@ -5,10 +5,7 @@ let sudokuGridBorderForOCR = (dst) => {
     const x = tileWidth * 0.14;
     const y = tileHeight * 0.13;
 
-
-
-
-    let tile = (i) => {
+    const tile = (i) => {
         j = parseInt(i/9, 10);
         let top = parseInt(j*tileHeight, 10)
         return {
@@ -23,12 +20,5 @@ let sudokuGridBorderForOCR = (dst) => {
     for (let i = 0; i < 81; i++) {
         tileArray.push(tile(i))
     }
-
-    // console.log(tileArray);
-
     return tileArray;
-
-    // for (let i = 0; i < 81; i++) {
-    //     console.log(tile(i));
-    // }
 }

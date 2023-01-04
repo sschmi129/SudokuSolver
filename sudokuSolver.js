@@ -92,13 +92,16 @@ const solveSudoku = (sudokuGrid) => {
     }
 
     if (hints < 17) {
-        return localSudokuGrid;
+
+        return [localSudokuGrid, false];
     }
 
     if(solveSudokuRec(localSudokuGrid)){
         console.log("recLog");
         console.log(localSudokuGrid);
-        return localSudokuGrid;
+        return [localSudokuGrid, true];
+    } else{
+        return [localSudokuGrid, false]
     }
     
 

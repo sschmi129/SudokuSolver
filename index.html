@@ -6,149 +6,24 @@
     <title>Sudoku Solver</title>
     <link rel="stylesheet" href="index.css">
     <script src="https://docs.opencv.org/5.x/opencv.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/nicolaspanel/numjs@0.15.1/dist/numjs.min.js"></script>
-    <script src='https://unpkg.com/tesseract.js/dist/tesseract.min.js'></script>
-    <!-- <script src="rectangles.js"></script> -->
+    <script src='https://unpkg.com/tesseract.js@4.x/dist/tesseract.min.js'></script>
     <script src="sudokuGridBorderForOCR.js"></script>
     <script src="sudokuSolver.js"></script>
+    <script src="insertHTML.js"></script>
+    <script src="croppingHelperFunctions.js"></script>
 </head>
 
 <body>
-    <h1 class="">Sudoku Solver</h1>
     <div id="mainDiv" class="mainDiv">
-        <!-- <div id="inputoutput">
-            <img id="imageSrc" src="sudoku.jpg"/>
-            <img id="imageSrc" src="_65_5724902.jpeg" alt="">
-            <div class="caption">imageSrc <input type="file" id="fileInput" name="file" /></div>
-            <button id="solve">Solve</button>
-        </div> -->
-        <!-- <label for="avatar">Choose a profile picture:</label> -->
-        <p>It uses OpenCV.js for recognition of the grid. The library Tesseract.js does the recognition of numbers.<br/>
+        <h1>Sudoku Solver</h1>
+        <p>It uses OpenCV.js for recognition of the grid. The library Tesseract.js does the recognition of
+            numbers.<br />
             You can use the given image of sudoku, upload your own sudoku image or take a image with your phone:</p>
-        <input type="file" id="inputImage" name="inputImage" accept="image/png, image/jpeg">
+        <input type="file" class="inputImage" id="inputImage" name="inputImage" accept="image/png, image/jpeg"
+            oninput="inputImageListener(event)">
         <div id="imagePlaceholder" class="imagePlaceholder">
-            <!-- <img id="testImage" src="_65_5724902.jpeg" alt="here test Image"> -->
-            <img id="testImage" src="_65_5724902.jpeg" alt="here test Image">
-            <select name="" id="blurSelectorTest">
-                <option value="0">cv.BORDER_CONSTANT</option>
-                <option value="1">cv.BORDER_REPLICATE</option>
-                <option value="2">cv.BORDER_REFLECT</option>
-                <option value="3">cv.BORDER_WRAP</option>
-                <option value="4">cv.BORDER_REFLECT_101</option>
-                <option value="5">cv.BORDER_TRANSPARENT</option>
-                <option value="6">cv.BORDER_REFLECT101</option>
-                <option value="7">cv.BORDER_DEFAULT</option>
-                <option value="8">cv.BORDER_ISOLATED</option>
-            </select>
-            <select name="" id="thresholdTypeSelectorTest">
-                <option value="0">cv.THRESH_BINARY</option>
-                <option value="1">cv.THRESH_BINARY_INV</option>
-            </select>
-            <button id="testSolveButton">Recognize</button>
-        </div>
-        <canvas id="canvasOutput" ></canvas>
-        <canvas id="canvasOutput2"></canvas>
-
-        <div class="sudokuGrid" id="sudokuGrid">
-            <div class="box3x3">
-                <div class="sudokuBox" id="box0"  onclick="numberCorrection(event)"></div>
-                <div class="sudokuBox" id="box1"  onclick="numberCorrection(event)"></div>
-                <div class="sudokuBox" id="box2"  onclick="numberCorrection(event)"></div>
-                <div class="sudokuBox" id="box9"  onclick="numberCorrection(event)"></div>
-                <div class="sudokuBox" id="box10" onclick="numberCorrection(event)"></div>
-                <div class="sudokuBox" id="box11" onclick="numberCorrection(event)"></div>
-                <div class="sudokuBox" id="box18" onclick="numberCorrection(event)"></div>
-                <div class="sudokuBox" id="box19" onclick="numberCorrection(event)"></div>
-                <div class="sudokuBox" id="box20" onclick="numberCorrection(event)"></div>
-            </div>
-            <div class="box3x3">
-                <div class="sudokuBox" id="box3"  onclick="numberCorrection(event)"></div>
-                <div class="sudokuBox" id="box4"  onclick="numberCorrection(event)"></div>
-                <div class="sudokuBox" id="box5"  onclick="numberCorrection(event)"></div>
-                <div class="sudokuBox" id="box12" onclick="numberCorrection(event)"></div>
-                <div class="sudokuBox" id="box13" onclick="numberCorrection(event)"></div>
-                <div class="sudokuBox" id="box14" onclick="numberCorrection(event)"></div>
-                <div class="sudokuBox" id="box21" onclick="numberCorrection(event)"></div>
-                <div class="sudokuBox" id="box22" onclick="numberCorrection(event)"></div>
-                <div class="sudokuBox" id="box23" onclick="numberCorrection(event)"></div>
-            </div>
-            <div class="box3x3">
-                <div class="sudokuBox" id="box6"  onclick="numberCorrection(event)"></div>
-                <div class="sudokuBox" id="box7"  onclick="numberCorrection(event)"></div>
-                <div class="sudokuBox" id="box8"  onclick="numberCorrection(event)"></div>
-                <div class="sudokuBox" id="box15" onclick="numberCorrection(event)"></div>
-                <div class="sudokuBox" id="box16" onclick="numberCorrection(event)"></div>
-                <div class="sudokuBox" id="box17" onclick="numberCorrection(event)"></div>
-                <div class="sudokuBox" id="box24" onclick="numberCorrection(event)"></div>
-                <div class="sudokuBox" id="box25" onclick="numberCorrection(event)"></div>
-                <div class="sudokuBox" id="box26" onclick="numberCorrection(event)"></div>
-            </div>
-            <div class="box3x3">
-                <div class="sudokuBox" id="box27" onclick="numberCorrection(event)"></div>
-                <div class="sudokuBox" id="box28" onclick="numberCorrection(event)"></div>
-                <div class="sudokuBox" id="box29" onclick="numberCorrection(event)"></div>
-                <div class="sudokuBox" id="box36" onclick="numberCorrection(event)"></div>
-                <div class="sudokuBox" id="box37" onclick="numberCorrection(event)"></div>
-                <div class="sudokuBox" id="box38" onclick="numberCorrection(event)"></div>
-                <div class="sudokuBox" id="box45" onclick="numberCorrection(event)"></div>
-                <div class="sudokuBox" id="box46" onclick="numberCorrection(event)"></div>
-                <div class="sudokuBox" id="box47" onclick="numberCorrection(event)"></div>
-            </div>
-            <div class="box3x3">
-                <div class="sudokuBox" id="box30" onclick="numberCorrection(event)"></div>
-                <div class="sudokuBox" id="box31" onclick="numberCorrection(event)"></div>
-                <div class="sudokuBox" id="box32" onclick="numberCorrection(event)"></div>
-                <div class="sudokuBox" id="box39" onclick="numberCorrection(event)"></div>
-                <div class="sudokuBox" id="box40" onclick="numberCorrection(event)"></div>
-                <div class="sudokuBox" id="box41" onclick="numberCorrection(event)"></div>
-                <div class="sudokuBox" id="box48" onclick="numberCorrection(event)"></div>
-                <div class="sudokuBox" id="box49" onclick="numberCorrection(event)"></div>
-                <div class="sudokuBox" id="box50" onclick="numberCorrection(event)"></div>
-            </div>
-            <div class="box3x3">
-                <div class="sudokuBox" id="box33" onclick="numberCorrection(event)"></div>
-                <div class="sudokuBox" id="box34" onclick="numberCorrection(event)"></div>
-                <div class="sudokuBox" id="box35" onclick="numberCorrection(event)"></div>
-                <div class="sudokuBox" id="box42" onclick="numberCorrection(event)"></div>
-                <div class="sudokuBox" id="box43" onclick="numberCorrection(event)"></div>
-                <div class="sudokuBox" id="box44" onclick="numberCorrection(event)"></div>
-                <div class="sudokuBox" id="box51" onclick="numberCorrection(event)"></div>
-                <div class="sudokuBox" id="box52" onclick="numberCorrection(event)"></div>
-                <div class="sudokuBox" id="box53" onclick="numberCorrection(event)"></div>
-            </div>
-            <div class="box3x3">
-                <div class="sudokuBox" id="box54" onclick="numberCorrection(event)"></div>
-                <div class="sudokuBox" id="box55" onclick="numberCorrection(event)"></div>
-                <div class="sudokuBox" id="box56" onclick="numberCorrection(event)"></div>
-                <div class="sudokuBox" id="box63" onclick="numberCorrection(event)"></div>
-                <div class="sudokuBox" id="box64" onclick="numberCorrection(event)"></div>
-                <div class="sudokuBox" id="box65" onclick="numberCorrection(event)"></div>
-                <div class="sudokuBox" id="box72" onclick="numberCorrection(event)"></div>
-                <div class="sudokuBox" id="box73" onclick="numberCorrection(event)"></div>
-                <div class="sudokuBox" id="box74" onclick="numberCorrection(event)"></div>
-            </div>
-            <div class="box3x3">
-                <div class="sudokuBox" id="box57" onclick="numberCorrection(event)"></div>
-                <div class="sudokuBox" id="box58" onclick="numberCorrection(event)"></div>
-                <div class="sudokuBox" id="box59" onclick="numberCorrection(event)"></div>
-                <div class="sudokuBox" id="box66" onclick="numberCorrection(event)"></div>
-                <div class="sudokuBox" id="box67" onclick="numberCorrection(event)"></div>
-                <div class="sudokuBox" id="box68" onclick="numberCorrection(event)"></div>
-                <div class="sudokuBox" id="box75" onclick="numberCorrection(event)"></div>
-                <div class="sudokuBox" id="box76" onclick="numberCorrection(event)"></div>
-                <div class="sudokuBox" id="box77" onclick="numberCorrection(event)"></div>
-            </div>
-            <div class="box3x3">
-                <div class="sudokuBox" id="box60" onclick="numberCorrection(event)"></div>
-                <div class="sudokuBox" id="box61" onclick="numberCorrection(event)"></div>
-                <div class="sudokuBox" id="box62" onclick="numberCorrection(event)"></div>
-                <div class="sudokuBox" id="box69" onclick="numberCorrection(event)"></div>
-                <div class="sudokuBox" id="box70" onclick="numberCorrection(event)"></div>
-                <div class="sudokuBox" id="box71" onclick="numberCorrection(event)"></div>
-                <div class="sudokuBox" id="box78" onclick="numberCorrection(event)"></div>
-                <div class="sudokuBox" id="box79" onclick="numberCorrection(event)"></div>
-                <div class="sudokuBox" id="box80" onclick="numberCorrection(event)"></div>
-            </div>
+            <img id="sudokuImage" src="_65_5724902.jpeg" alt="Sudoku Image">
+            <button id="recognizeSudokuGridButton" onclick="recognizeSudokuGridButtonListener(event)">Recognize</button>
         </div>
     </div>
     <script type="text/javascript" src="cropping.js"></script>
